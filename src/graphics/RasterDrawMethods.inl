@@ -99,8 +99,21 @@ int PIXELMETHODS_CLASS::drawtext(int x, int y, std::string s, int r, int g, int 
 TPT_INLINE int PIXELMETHODS_CLASS::drawchar(int x, int y, int c, int r, int g, int b, int a)
 {
 	int i, j, w, bn = 0, ba = 0;
-	char *rp = font_data + font_ptrs[c];
-	w = *(rp++);
+	int mn=0,mx=font_max-1;
+	int index=0x5E;
+	for(;mn<mx-1;)
+        if(mn==c){
+            index=font_index[mn];
+            break;
+        }else if(mx==c){
+            index=font_index[mx];
+            break;
+        }else if(2*c>mx+mn)
+            mn=(int)((mx+mn)/2);
+        else
+            mx=(int)((mx+mn)/2);
+	char *rp = font_data + font_ptrs[index];
+	w = ((char*)font_width)[index];
 	for (j=0; j<FONT_H; j++)
 		for (i=0; i<w; i++)
 		{
@@ -119,8 +132,21 @@ TPT_INLINE int PIXELMETHODS_CLASS::drawchar(int x, int y, int c, int r, int g, i
 TPT_NO_INLINE int PIXELMETHODS_CLASS::addchar(int x, int y, int c, int r, int g, int b, int a)
 {
 	int i, j, w, bn = 0, ba = 0;
-	char *rp = font_data + font_ptrs[c];
-	w = *(rp++);
+	int mn=0,mx=font_max-1;
+	int index=0x5E;
+	for(;mn<mx-1;)
+        if(mn==c){
+            index=font_index[mn];
+            break;
+        }else if(mx==c){
+            index=font_index[mx];
+            break;
+        }else if(2*c>mx+mn)
+            mn=(int)((mx+mn)/2);
+        else
+            mx=(int)((mx+mn)/2);
+	char *rp = font_data + font_ptrs[index];
+	w = ((char*)font_width)[index];
 	for (j=0; j<FONT_H; j++)
 		for (i=0; i<w; i++)
 		{
