@@ -220,7 +220,7 @@ unsigned short font_index[] = {
 unsigned short font_max = 95;
 #else
 extern char font_data[];
-extern unsigned int font_width[];
+extern char font_width[];
 extern unsigned int font_ptrs[];
 extern unsigned short font_index[];
 extern unsigned short font_max;

@@ -462,6 +462,7 @@ pixel *Graphics::rescale_img(pixel *src, int sw, int sh, int *qw, int *qh, int f
 int Graphics::textwidth(const char *s)
 {
 	int x = 0;
+	for (; *s; s++)
 		x += CharWidth(s[0]);
 	return x-1;
 }
@@ -474,7 +475,7 @@ int Graphics::CharWidth(char c)
             index=k;
             break;
         }
-	return font_width[index];;
+	return font_width[index];
 }
 
 int Graphics::textnwidth(char *s, int n)
