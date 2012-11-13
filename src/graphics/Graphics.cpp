@@ -723,7 +723,7 @@ void Graphics::textsize(const char * s, int & width, int & height)
 		}
 		else
 		{
-            cWidth= CharWidth(s[0]);
+            cWidth+=CharWidth(s[0]);
 			if(cWidth>lWidth)
 				lWidth = cWidth;
 		}
