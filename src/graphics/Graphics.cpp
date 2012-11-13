@@ -54,8 +54,14 @@ void VideoBuffer::Resize(float factor, bool resample)
 int VideoBuffer::SetCharacter(int x, int y, int c, int r, int g, int b, int a)
 {
 	int i, j, w, bn = 0, ba = 0;
-	char *rp = font_data + font_ptrs[c];
-	w = *(rp++);
+	int index=0x5E;
+	for(int k=0;k<font_max;k++)
+        if(font_index[k]==c){
+            index=k;
+            break;
+        }
+	char *rp = font_data + font_ptrs[index];
+	w = font_width[index];
 	for (j=0; j<FONT_H; j++)
 		for (i=0; i<w; i++)
 		{
@@ -74,8 +80,14 @@ int VideoBuffer::SetCharacter(int x, int y, int c, int r, int g, int b, int a)
 int VideoBuffer::BlendCharacter(int x, int y, int c, int r, int g, int b, int a)
 {
 	int i, j, w, bn = 0, ba = 0;
-	char *rp = font_data + font_ptrs[c];
-	w = *(rp++);
+	int index=0x5E;
+	for(int k=0;k<font_max;k++)
+        if(font_index[k]==c){
+            index=k;
+            break;
+        }
+	char *rp = font_data + font_ptrs[index];
+	w = font_width[index];
 	for (j=0; j<FONT_H; j++)
 		for (i=0; i<w; i++)
 		{
@@ -94,8 +106,14 @@ int VideoBuffer::BlendCharacter(int x, int y, int c, int r, int g, int b, int a)
 int VideoBuffer::AddCharacter(int x, int y, int c, int r, int g, int b, int a)
 {
 	int i, j, w, bn = 0, ba = 0;
-	char *rp = font_data + font_ptrs[c];
-	w = *(rp++);
+	int index=0x5E;
+	for(int k=0;k<font_max;k++)
+        if(font_index[k]==c){
+            index=k;
+            break;
+        }
+	char *rp = font_data + font_ptrs[index];
+	w = font_width[index];
 	for (j=0; j<FONT_H; j++)
 		for (i=0; i<w; i++)
 		{
@@ -138,7 +156,7 @@ char * Graphics::GenerateGradient(pixel * colours, float * points, int pointcoun
 				temp = points[j-1];
 				points[j-1] = points[j];
 				points[j] = temp;
-				
+
 				ptemp = colours[j-1];
 				colours[j-1] = colours[j];
 				colours[j] = ptemp;
@@ -175,7 +193,7 @@ void *Graphics::ptif_pack(pixel *src, int w, int h, int *result_size){
 	unsigned char *blue_chan = (unsigned char*)calloc(1, w*h);
 	unsigned char *data = (unsigned char*)malloc(((w*h)*3)+8);
 	unsigned char *result = (unsigned char*)malloc(((w*h)*3)+8);
-	
+
 	for(cx = 0; cx<w; cx++){
 		for(cy = 0; cy<h; cy++){
 			red_chan[w*(cy)+(cx)] = PIXR(src[w*(cy)+(cx)]);
@@ -183,14 +201,14 @@ void *Graphics::ptif_pack(pixel *src, int w, int h, int *result_size){
 			blue_chan[w*(cy)+(cx)] = PIXB(src[w*(cy)+(cx)]);
 		}
 	}
-	
+
 	memcpy(data, red_chan, w*h);
 	memcpy(data+(w*h), green_chan, w*h);
 	memcpy(data+((w*h)*2), blue_chan, w*h);
 	free(red_chan);
 	free(green_chan);
 	free(blue_chan);
-	
+
 	result[0] = 'P';
 	result[1] = 'T';
 	result[2] = 'i';
@@ -199,15 +217,15 @@ void *Graphics::ptif_pack(pixel *src, int w, int h, int *result_size){
 	result[5] = w>>8;
 	result[6] = h;
 	result[7] = h>>8;
-	
+
 	i -= 8;
-	
+
 	if(BZ2_bzBuffToBuffCompress((char *)(result+8), (unsigned *)&i, (char *)data, datalen, 9, 0, 0) != 0){
 		free(data);
 		free(result);
 		return NULL;
 	}
-	
+
 	*result_size = i+8;
 	free(data);
 	return result;
@@ -231,14 +249,14 @@ pixel *Graphics::ptif_unpack(void *datain, int size, int *w, int *h){
 	}
 	width = data[4]|(data[5]<<8);
 	height = data[6]|(data[7]<<8);
-	
+
 	i = (width*height)*3;
 	undata = (unsigned char*)calloc(1, (width*height)*3);
 	red_chan = (unsigned char*)calloc(1, width*height);
 	green_chan = (unsigned char*)calloc(1, width*height);
 	blue_chan = (unsigned char *)calloc(1, width*height);
 	result = (pixel *)calloc(width*height, PIXELSIZE);
-	
+
 	resCode = BZ2_bzBuffToBuffDecompress((char *)undata, (unsigned *)&i, (char *)(data+8), size-8, 0, 0);
 	if (resCode){
 		printf("Decompression failure, %d\n", resCode);
@@ -261,13 +279,13 @@ pixel *Graphics::ptif_unpack(void *datain, int size, int *w, int *h){
 	memcpy(red_chan, undata, width*height);
 	memcpy(green_chan, undata+(width*height), width*height);
 	memcpy(blue_chan, undata+((width*height)*2), width*height);
-	
+
 	for(cx = 0; cx<width; cx++){
 		for(cy = 0; cy<height; cy++){
 			result[width*(cy)+(cx)] = PIXRGB(red_chan[width*(cy)+(cx)], green_chan[width*(cy)+(cx)], blue_chan[width*(cy)+(cx)]);
 		}
 	}
-	
+
 	*w = width;
 	*h = height;
 	free(red_chan);
@@ -350,7 +368,7 @@ pixel *Graphics::resample_img(pixel *src, int sw, int sh, int rw, int rh)
 					(int)(((((float)PIXR(tl))*(1.0f-fxc))+(((float)PIXR(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXR(bl))*(1.0f-fxc))+(((float)PIXR(br))*(fxc)))*(fyc)),
 					(int)(((((float)PIXG(tl))*(1.0f-fxc))+(((float)PIXG(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXG(bl))*(1.0f-fxc))+(((float)PIXG(br))*(fxc)))*(fyc)),
 					(int)(((((float)PIXB(tl))*(1.0f-fxc))+(((float)PIXB(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXB(bl))*(1.0f-fxc))+(((float)PIXB(br))*(fxc)))*(fyc))
-					);				
+					);
 			}
 	} else {
 		//Stairstepping
@@ -393,7 +411,7 @@ pixel *Graphics::resample_img(pixel *src, int sw, int sh, int rw, int rh)
 						(int)(((((float)PIXR(tl))*(1.0f-fxc))+(((float)PIXR(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXR(bl))*(1.0f-fxc))+(((float)PIXR(br))*(fxc)))*(fyc)),
 						(int)(((((float)PIXG(tl))*(1.0f-fxc))+(((float)PIXG(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXG(bl))*(1.0f-fxc))+(((float)PIXG(br))*(fxc)))*(fyc)),
 						(int)(((((float)PIXB(tl))*(1.0f-fxc))+(((float)PIXB(tr))*(fxc)))*(1.0f-fyc) + ((((float)PIXB(bl))*(1.0f-fxc))+(((float)PIXB(br))*(fxc)))*(fyc))
-						);				
+						);
 				}
 			free(oq);
 			oq = q;
@@ -444,14 +462,19 @@ pixel *Graphics::rescale_img(pixel *src, int sw, int sh, int *qw, int *qh, int f
 int Graphics::textwidth(const char *s)
 {
 	int x = 0;
-	for (; *s; s++)
-		x += font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+		x += CharWidth(s[0]);
 	return x-1;
 }
 
 int Graphics::CharWidth(char c)
 {
-	return font_data[font_ptrs[(int)c]];
+	int index=0x5E;
+	for(int k=0;k<font_max;k++)
+        if(font_index[k]==c){
+            index=k;
+            break;
+        }
+	return font_width[index];;
 }
 
 int Graphics::textnwidth(char *s, int n)
@@ -471,7 +494,7 @@ int Graphics::textnwidth(char *s, int n)
 			s+=3;
 			continue;
 		}
-		x += font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+		x += CharWidth(s[0]);
 		n--;
 	}
 	return x-1;
@@ -496,7 +519,7 @@ void Graphics::textnpos(char *s, int n, int w, int *cx, int *cy)
 			if (!n) {
 				break;
 			}
-			x += font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+            x += CharWidth(s[0]);
 			if (x>=w)
 			{
 				x = 0;
@@ -525,7 +548,7 @@ int Graphics::textwidthx(char *s, int w)
 			s+=3;
 			continue;
 		}
-		cw = font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+		cw = CharWidth(s[0]);
 		if (x+(cw/2) >= w)
 			break;
 		x += cw;
@@ -558,7 +581,7 @@ int Graphics::PositionAtCharIndex(char *s, int charIndex, int & positionX, int &
 			charIndex-=4;
 			continue;
 		}
-		x += font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+		x += CharWidth(s[0]);
 		charIndex--;
 	}
 	positionX = x;
@@ -587,7 +610,7 @@ int Graphics::CharIndexAtPosition(char *s, int positionX, int positionY)
 			charIndex+=4;
 			continue;
 		}
-		cw = font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+		cw = CharWidth(s[0]);
 		if ((x+(cw/2) >= positionX && y+FONT_H >= positionY) || y > positionY)
 			break;
 		x += cw;
@@ -611,7 +634,7 @@ int Graphics::textposxy(char *s, int width, int w, int h)
 		}
 		for (; *s && --wordlen>=-1; s++)
 		{
-			cw = font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+            cw = CharWidth(s[0]);
 			if ((x+(cw/2) >= w && y+6 >= h)||(y+6 >= h+FONT_H+2))
 				return n++;
 			x += cw;
@@ -657,7 +680,7 @@ int Graphics::textwrapheight(char *s, int width)
 			}
 			else
 			{
-				cw = font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+                cw = CharWidth(s[0]);
 				if (x+cw>=width)
 				{
 					x = 0;
@@ -699,7 +722,7 @@ void Graphics::textsize(const char * s, int & width, int & height)
 		}
 		else
 		{
-			cWidth += font_data[font_ptrs[(int)(*(unsigned char *)s)]];
+            cWidth= CharWidth(s[0]);
 			if(cWidth>lWidth)
 				lWidth = cWidth;
 		}
