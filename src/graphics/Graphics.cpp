@@ -467,15 +467,15 @@ int Graphics::textwidth(const char *s)
 	return x-1;
 }
 
-int Graphics::CharWidth(char c)
+int Graphics::CharWidth(unsigned char c)
 {
 	int index=0x5E;
 	for(int k=0;k<font_max;k++)
-        if(font_index[k]==c){
+        if(font_index[k]==(unsigned short)c){
             index=k;
             break;
         }
-	return font_width[index];
+    return font_width[index];
 }
 
 int Graphics::textnwidth(char *s, int n)
