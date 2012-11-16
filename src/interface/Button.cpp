@@ -30,7 +30,7 @@ Button::Button(Point position, Point size, std::string buttonText, std::string t
 void Button::TextPosition()
 {
 	buttonDisplayText = ButtonText;
-	if(buttonDisplayText.length())
+	/*if(buttonDisplayText.length())
 	{
 		if(Graphics::textwidth((char *)buttonDisplayText.c_str()) > Size.X - (Appearance.icon? 22 : 0))
 		{
@@ -38,7 +38,7 @@ void Button::TextPosition()
 			buttonDisplayText = buttonDisplayText.erase(position, buttonDisplayText.length()-position);
 			buttonDisplayText += "...";
 		}
-	}
+	}*/
 
 	Component::TextPosition(buttonDisplayText);
 }
@@ -147,7 +147,7 @@ void Button::Draw(const Point& screenPos)
 			}
 			else
 			{
-				g->draw_icon(Position.X+iconPosition.X, Position.Y+iconPosition.Y, Appearance.icon, 255, iconInvert);	
+				g->draw_icon(Position.X+iconPosition.X, Position.Y+iconPosition.Y, Appearance.icon, 255, iconInvert);
 			}
 		else
 			g->draw_icon(Position.X+iconPosition.X, Position.Y+iconPosition.Y, Appearance.icon, 180, iconInvert);
