@@ -9,18 +9,19 @@ unsigned int getutf8(const char*s){
                     return 0xFFFD;
             }else{
                 unsigned char d=s[1];
-                if(d&0xC0!=0x80)
+                if((d&0xC0)!=0x80)
                     return 0xFFFD;
-                return ((c&0x1C)<<6)|(d&0x3C);
+                return ((c&0x1F)<<6)|(d&0x3F);
             }
         }else{
             unsigned char d=s[1];
-            if(d&0xC0!=0x80)
-                return 0xFFFD;
+            if((d&0xC0)!=0x80)
+                return d&0x7F;//0xFFFD;
             unsigned char e=s[2];
-            if(d&0xC0!=0x80)
+            if((e&0xC0)!=0x80)
                 return 0xFFFD;
-            return ((c&0x0C)<<12)|((d&0x3C)<<6)|(d&0x3C);
+            int a=((c&0x0F)<<12)|((d&0x3F)<<6)|(e&0x3F);
+            return a;
         }
     }else
         return 0xFFFD;
@@ -37,16 +38,16 @@ unsigned int getutf8len(const char*s){
                     return 1;
             }else{
                 unsigned char d=s[1];
-                if(d&0xC0!=0x80)
+                if((d&0xC0)!=0x80)
                     return 1;
                 return 2;
             }
         }else{
             unsigned char d=s[1];
-            if(d&0xC0!=0x80)
+            if((d&0xC0)!=0x80)
                 return 1;
             unsigned char e=s[2];
-            if(d&0xC0!=0x80)
+            if((e&0xC0)!=0x80)
                 return 2;
             return 3;
         }
